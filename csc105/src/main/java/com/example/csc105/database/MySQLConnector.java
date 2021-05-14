@@ -12,6 +12,7 @@ public class MySQLConnector {
 
     public MySQLConnector() throws SQLException {
         reconnect();
+
     }
     public static Connection getConnection() throws SQLException {
         if (connection.isClosed())

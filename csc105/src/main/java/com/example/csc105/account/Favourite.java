@@ -16,6 +16,7 @@ public class Favourite {
     @PostMapping(path = "/favourite")
     public Map<String, Object> Fav(@RequestBody FavouriteDTO favourite, @CookieValue String token) {
         Map<String, Object> res = new HashMap<>();
+        System.out.println(favourite.getPlaceId());
         try {
             String username = JwtUtils.parseToken(token);
             Connection connection = MySQLConnector.getConnection();

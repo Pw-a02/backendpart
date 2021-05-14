@@ -3,47 +3,45 @@ package com.example.csc105.account;
 import com.example.csc105.DTO.PlaceDTO;
 import com.example.csc105.DTO.RegisterDTO;
 import com.example.csc105.database.MySQLConnector;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 public class Place {
-    @PostMapping(path = "/place")
-    public Map<String, Object> Place(@RequestBody PlaceDTO place) {
+    @GetMapping(path = "/places")
+    public Map<String, Object> Place() {
         Map<String, Object> res = new HashMap<>();
         try {
             Connection connection = MySQLConnector.getConnection();
-            PreparedStatement pstm = connection.prepareStatement("INSERT INTO Place ( Place_ID, Name,Location,Price )\n" +
-                    "VALUES (?, ?, ?,?)");
-            pstm.setInt(1, place.getPlaceID());
-            pstm.setString(2, place.getName());
-            pstm.setString(3, place.getLocation());
-            pstm.setDouble(4, place.getPrice());
-            pstm.execute();
+            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM Place " );
+            ResultSet rs = pstm.executeQuery();
+            ArrayList<Object> places = new ArrayList<>();
+            while (rs.next()){
+                Map<String, Object> list = new HashMap<>();
+                list.put("Place_ID",rs.getInt("Place_ID"));
+                list.put("Name",rs.getString("Name"));
+                list.put("Location",rs.getString("Location"));
+                list.put("Price",rs.getString("Price"));
+                places.add(list);
+            }
 
-            res.put("isAddPlace", true);
+            res.put("places", places);
+            res.put("isPlace", true);
             res.put("text","Add Place successfull");
         } catch (Exception e) {
-            res.put("isAddPlace", false);
-            if (e instanceof SQLIntegrityConstraintViolationException) {
-                if (e.getMessage().contains("PRIMARY")) {
-                    res.put("text", "This place is already add :(");
-                } else if(e.getMessage().contains("User_Email_uindex")) {
-                    res.put("text", "This place is already add :(");
-                }
-            } else {
+            res.put("isPlace", false);
+
                 e.printStackTrace();
                 res.put("text", "MySQL error :(");
-            }
+
         }
         return res;
     }
